@@ -1,0 +1,74 @@
+-- 23.08.2017 07:19:32 AR V1.0a
+
+block.setSize(6, 51)
+
+generic = {
+  parameter = {
+    outputs = 2
+  },
+
+  refreshPins = function(self)
+    block.setOutputsPinCount(self.parameter.outputs)
+    for i = 1, self.parameter.outputs do
+      block.setOutputPinTypeRestrains(i, 'table')
+    end
+  end,
+
+  init = function(self)
+    block.setInputsPinCount(1)
+    block.setInputPinTypeRestrains(1, 'table')
+    generic:refreshPins()
+    block.modifyFlags('SupressStopFunctionCall', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Fork', 'Duplicate the token to all outputs')
+    gui.add('Edit', 'EditNumberOfOutputs', 'Number of outputs')
+    gui.set('EditNumberOfOutputs', 'Integer', self.parameter.outputs)
+    gui.setSize()
+  end,
+
+  apply = function(self)
+    self.parameter.outputs = math.max(gui.get('EditNumberOfOutputs', 'Integer'), 1)
+    generic:refreshPins()
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar(0x54, '', 'draw.line(6, 2, 16, 6, 6, 10)')
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function()
+          block.q = {}
+          for i = 1, N do
+            block.q[i] = {active = false}
+          end
+        end
+
+        block.step = function(a)
+          if a.token then
+            for i = 1, N do
+              block.q[i].token = true
+            end
+            a.token = false
+          end
+          return table.unpack(block.q)
+        end
+
+        return block
+      ]==]
+    local replaces = {
+      ['N'] = self.parameter.outputs
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+

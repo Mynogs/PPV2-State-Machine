@@ -1,0 +1,72 @@
+-- 20.08.2017 10:02:30 AR V1.0a
+-- 22.08.2017 18:56:31 AR V1.0b
+
+generic = {
+  parameter = {
+  },
+
+  refreshPins = function(self)
+  end,
+
+  init = function(self)
+    block.setInputsPinCount(2)
+    block.setInputPinTypeRestrains(1, 'table')
+    block.setInputPinTypeRestrains(2, 'boolean')
+    block.setInputPinName(2, 'sel')
+    block.setOutputsPinCount(2)
+    block.setOutputPinTypeRestrains(1, 'table')
+    block.setOutputPinTypeRestrains(2, 'table')
+    block.setOutputPinName(1, 't')
+    block.setOutputPinName(2, 'f')
+    block.modifyFlags('SupressStopFunctionCall', true)
+    block.modifyFlags('BreakAlgebraLoop', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Branch', 'Branch to different states')
+    gui.setSize()
+  end,
+
+  apply = function(self)
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar(
+      0x0,
+      '',
+      'draw.line(px(0), py(60), px(66), py(60), px(66), py(100)) draw.line(0, 2, 10, 6, 0, 10)'
+      )
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function()
+          block.t = {active = false}
+          block.f = {active = false}
+        end
+
+        block.stepFirst = function()
+          return block.t, block.f
+        end
+
+        block.stepLast = function(a, sel)
+          block.t = sel and a or {active = false}
+          block.f = sel and {active = false} or a
+        end
+
+        return block
+      ]==]
+    local replaces = {
+      ['N'] = self.parameter.outputs
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+

@@ -1,0 +1,74 @@
+-- 18.08.2017 17:20:33 AR V1.0a
+-- 20.08.2017 09:59:22 AR V1.0b
+
+generic = {
+  parameter = {
+  },
+
+  init = function(self)
+    block.setInputsPinCount(2)
+    block.setOutputsPinCount(1)
+    block.setInputPinTypeRestrains(1, 'table')
+    block.setInputPinTypeRestrains(1, 'boolean', 'number')
+    block.setOutputPinTypeRestrains(1, 'table')
+    block.modifyFlags('SupressStopFunctionCall', true)
+    block.modifyFlags('BreakAlgebraLoop', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Expession', [[
+Pass the token if expression is true
+Use "a" as the input variable name.
+Example: b > 10
+]])
+    gui.add('Edit', 'EditFunction', 'Function')
+    gui.set('EditFunction', 'Text', self.parameter.f)
+    gui.setSize()
+  end,
+
+  apply = function(self)
+    self.parameter.f = gui.get('EditFunction', 'Text')
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar(0x00, "'f(a)'", 'draw.line(0, 2, 10, 6, 0, 10)')
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function()
+          local f, e = load('a = ... return F')
+          assert(f, e)
+          block.f = f
+          block.q = {active = false}
+        end
+
+        block.stepFirst = function()
+          return block.q
+        end
+
+        block.stepLast = function(a, b)
+          local q = block.f(a)
+          if q then
+            block.q = a
+          else
+            block.q = {active = false}
+          end
+        end
+
+        return block
+      ]==]
+    local replaces = {
+      ['DELAY'] = self.parameter.delayS,
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+

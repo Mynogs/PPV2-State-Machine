@@ -1,0 +1,70 @@
+-- 19.08.2017 05:17:32 AR V1.0a
+
+block.setSize(21, 21)
+
+generic = {
+  parameter = {
+  },
+
+  init = function(self)
+    block.setInputsPinCount(1)
+    block.setOutputsPinCount(0)
+    block.setInputPinTypeRestrains(1, 'table')
+    block.modifyFlags('SupressStopFunctionCall', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Inital state', [[
+This disable the whole subsystem
+]])
+    gui.setSize()
+  end,
+
+  apply = function(self)
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar{
+      Type = 0x5D,
+      CenterDrawSource = [[
+        if token.get('.' .. self.uuid .. '.token') == 'true' then
+          draw.setColorA(1.0, 0.6, 0.8)
+          draw.roundRect(3, 3, w - 6, h - 6, h, 2)
+          draw.setColorA(0.0, 0.0, 0.0)
+        end
+      ]],
+      DragInfo = 0x3B0
+    }
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function()
+          block.timeS = 0
+        end
+
+        block.step = function(a)
+          if a.token then
+            a.token = false
+            block.timeS = 2
+          end
+          block.timeS = block.timeS - block.parent.ellapsedS
+          token.set('.UUID.token', block.timeS > 0)
+        end
+
+        return block
+      ]==]
+    local replaces = {
+      ['UUID'] = block.getUUID(),
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+

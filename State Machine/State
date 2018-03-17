@@ -1,0 +1,102 @@
+-- 19.08.2017 05:46:20 AR V1.0a
+
+generic = {
+  parameter = {
+    info = 'state',
+    inputs = 1,
+    hasStateOutput = false
+  },
+
+  refreshPins = function(self)
+    block.setInputsPinCount(self.parameter.inputs)
+    for i = 1, self.parameter.inputs do
+      block.setInputPinTypeRestrains(i, 'nil', 'table')
+    end
+    if self.parameter.hasStateOutput then
+      block.setOutputsPinCount(2)
+      block.setOutputPinTypeRestrains(2, 'boolean')
+      block.setOutputPinName(2, 'active')
+    else
+      block.setOutputsPinCount(1)
+    end
+    block.setOutputPinTypeRestrains(1, 'table')
+  end,
+
+  init = function(self)
+    self.parameter.inputs = math.max(block.getInputsPinCount(), 1)
+    generic.refreshPins(self)
+    block.setInputPinTypeRestrains(1, 'table')
+    block.setOutputPinTypeRestrains(1, 'table')
+    block.modifyFlags('SupressStopFunctionCall', true)
+    block.modifyFlags('AutoAddInputPin', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'State', [[
+If the the state recieve a token the state is active.
+When the token is passed, the state is inactive.
+
+It is possible to add a boolean state output
+]])
+    gui.add('Edit', 'EditInfo', 'Info')
+    gui.add('Edit', 'EditNumberOfInputs', 'Number of inputs')
+    gui.add('CheckBox', 'CheckBoxStateOutput', 'Has state output', {Width = 120})
+    gui.set('EditInfo', 'Text', self.parameter.info)
+    gui.set('EditNumberOfInputs', 'Integer', self.parameter.inputs)
+    gui.set('CheckBoxStateOutput', 'Checked', self.parameter.hasStateOutput)
+    gui.setSize()
+  end,
+
+  apply = function(self)
+    self.parameter.info = gui.get('EditInfo', 'Text')
+    self.parameter.inputs = gui.get('EditNumberOfInputs', 'Integer')
+    self.parameter.hasStateOutput = gui.get('CheckBoxStateOutput', 'Checked')
+    generic.refreshPins(self)
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar(0x52, "'" .. (self.parameter.info or '') .. "'",
+      [[
+        if token.get('.' .. self.uuid .. '.token') == 'true' then
+          draw.setColorA(1.0, 0.6, 0.8)
+          draw.roundRect(5, 5, w - 10, h - 10, (h - 10) / 3, 5)
+          draw.setColorA(0.0, 0.0, 0.0)
+        end
+      ]]
+    )
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function()
+          block.token = false
+        end
+
+        block.step = function(...)
+          local arg = {...}
+          for _, v in pairs(arg) do
+            if v.token then
+              block.token = true
+            end
+            v.token = false
+          end
+          token.set('.UUID.token', block.token)
+          return block, block.token
+        end
+
+        return block
+      ]==]
+    local replaces = {
+      ['UUID'] = block.getUUID(),
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+

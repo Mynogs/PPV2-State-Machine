@@ -1,0 +1,75 @@
+
+generic = {
+  parameter = {
+    outputs = 2
+  },
+
+  refreshPins = function(self)
+    block.setOutputsPinCount(self.parameter.outputs)
+    for i = 1, self.parameter.outputs do
+      block.setOutputPinTypeRestrains(i, 'table')
+    end
+  end,
+
+  init = function(self)
+    block.setInputsPinCount(2)
+    block.setInputPinTypeRestrains(1, 'table')
+    block.setInputPinName(2, 'sel#')
+    generic:refreshPins()
+    block.modifyFlags('SupressStopFunctionCall', true)
+    block.modifyFlags('BreakAlgebraLoop', true)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Branch', 'Branch to different states')
+    gui.add('Edit', 'EditNumberOfOutputs', 'Number of outputs')
+    gui.set('EditNumberOfOutputs', 'Integer', self.parameter.outputs)
+    gui.setSize()
+  end,
+
+  apply = function(self)
+    self.parameter.outputs = math.max(gui.get('EditNumberOfOutputs', 'Integer'), 1)
+    generic:refreshPins()
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    return block.getDefaultAvatar(
+      0x0,
+      '',
+      'draw.line(px(0), py(60), px(66), py(60), px(66), py(100)) draw.line(0, 2, 10, 6, 0, 10)'
+      )
+  end,
+
+  generate = function(self)
+    local source =
+      [==[
+        local block = {}
+
+        block.start = function()
+          block.q = {active = false}
+        end
+
+        block.stepFirst = function()
+          return block.q
+        end
+
+        block.stepLast = function(a, sel)
+          sel = math.floor
+          for i = 1, N do
+            block.q[i].token = (i == sel) and a or {active = false}
+          end
+        end
+
+        return block
+      ]==]
+    local replaces = {
+      ['N'] = self.parameter.outputs
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+}
+

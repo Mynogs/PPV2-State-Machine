@@ -1,0 +1,76 @@
+
+generic = {
+  parameter = {
+    text = 'Text'
+  },
+
+  init = function(self)
+    block.setInputsPinCount(0)
+    block.setOutputsPinCount(0)
+    block.modifyFlags('CanGenerateCode', false)
+  end,
+
+  open = function(self)
+    gui.add('Info', 'Info', 'Group', 'Group documentation')
+    gui.add('Edit', 'EditText', 'Text')
+    gui.set('EditText', 'Text', self.parameter.text)
+    gui.setSize()
+  end,
+
+  apply = function(self)
+    self.parameter.outputs = gui.get('EditText', 'Text')
+  end,
+
+  close = function()
+  end,
+
+  avatar = function(self)
+    local source =
+      [==[
+        avatarBase = require 'avatarBase',
+        uuid = 'UUID',
+        name = 'NAME',
+
+        onDraw = function(self)
+          avatar.find(self.uuid)
+          local x, y, w, h = avatar.getRect()
+          draw.setOrgin(x, y)
+          if avatar.isSelected() then
+            draw.setColorA(0.8, 0.8, 1.0)
+            draw.roundRect(-5, -5, w + 10, h + 10, (h + 10) / 3, 6)
+          end
+          draw.setColorA(0.0, 0.0, 0.0)
+          draw.setLineStyle('dot')
+          draw.roundRect(0, 0, w, h, h / 3)
+          draw.setLineStyle('solid')
+          draw.text(0, h, w, h, self.name, 1)
+          function px(p)
+            return p / 100.0 * w
+          end
+          function py(p)
+            return p / 100.0 * h
+          end
+          draw.text(w / 12, 4, w, h, 'TEXT', 0)
+        end,
+
+        onGetPinInfos = function(self)
+          return {inputs = {}, outputs = {}}
+        end,
+
+        onGetDragInfo = function(self)
+          return 0x1FF, true
+        end
+      ]==]
+    local replaces = {
+      ['UUID'] = block.getUUID(),
+      ['NAME'] = block.getName(),
+      ['TEXT'] = self.parameter.text,
+    }
+    return string.gsub(source, '%a+', replaces)
+  end,
+
+  generate = function(self)
+  end,
+
+}
+
