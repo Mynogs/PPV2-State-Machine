@@ -1,4 +1,4 @@
-# PPV2-State-Machine
-PPV2 State Machine
+# PPV2 State Machine
+This library is part of the [P+ simulation software](https://github.com/Mynogs/PPV2-Simulation-System).
 
-This library is part of the P+ simulation software. It implements blocks for state machines.
+To install the block library please look here: [Install blocks](https://github.com/Mynogs/PPV2-Simulation-System/blob/master/README.md#install-blocks)
