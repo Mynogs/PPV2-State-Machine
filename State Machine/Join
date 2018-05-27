@@ -11,12 +11,14 @@ generic = {
     block.setInputsPinCount(self.parameter.inputs)
     for i = 1, self.parameter.inputs do
       block.setInputPinTypeRestrains(i, 'table')
+      block.setInputPinAppearance(i, 0)
     end
   end,
 
   init = function(self)
     block.setOutputsPinCount(1)
     block.setOutputPinTypeRestrains(1, 'table')
+    block.setOutputPinAppearance(1, 0)
     generic:refreshPins()
     block.modifyFlags('SupressStartFunctionCall', true)
     block.modifyFlags('SupressStopFunctionCall', true)

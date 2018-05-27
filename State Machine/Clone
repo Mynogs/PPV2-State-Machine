@@ -9,12 +9,14 @@ generic = {
     for i = 1, self.parameter.outputs do
       block.setOutputPinTypeRestrains(i, 'table')
       block.setOutputPinName(i, 'q' .. i)
+      block.setOutputPinAppearance(i, 0)
     end
   end,
 
   init = function(self)
     block.setInputsPinCount(1)
     block.setInputPinTypeRestrains(1, 'table')
+    block.setInputPinAppearance(1, 0)
     generic:refreshPins()
     block.modifyFlags('SupressStopFunctionCall', true)
     block.modifyFlags('BreakAlgebraLoop', true)

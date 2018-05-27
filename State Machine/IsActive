@@ -1,44 +1,45 @@
--- 19.08.2017 05:17:14 AR V1.0a
-
-block.setSize(21, 21)
+block.setSize(51, 21)
 
 generic = {
   parameter = {
+    name = 'State',
+    inputs = 1,
   },
 
   init = function(self)
-    block.setInputsPinCount(0)
     block.setOutputsPinCount(1)
-    block.setOutputPinTypeRestrains(1, 'table')
-    block.setOutputPinAppearance(1, 0)
+    block.setOutputPinTypeRestrains(1, 'boolean')
+    block.modifyFlags('SupressStartFunctionCall', true)
     block.modifyFlags('SupressStopFunctionCall', true)
   end,
 
   open = function(self)
-    gui.add('Info', 'Info', 'Inital state', [[
-Generate a token at simulation start
+    gui.add('Info', 'Info', 'Is state active', [[
+Is the state block with the given name
+active the result is trur
 ]])
+    gui.add('Edit', 'EditName', 'State name')
+    gui.set('EditName', 'Text', self.parameter.name)
     gui.setSize()
   end,
 
   apply = function(self)
+    self.parameter.name = gui.get('EditName', 'Text')
   end,
 
   close = function()
   end,
 
   avatar = function(self)
-    return block.getDefaultAvatar{
-      Type = 0x5B,
-      CenterDrawSource = [[
+    return block.getDefaultAvatar(0x152, "'" .. self.parameter.name .. "'",
+      [[
         if token.get('.' .. self.uuid .. '.token') == 'true' then
           draw.setColorA(1.0, 0.6, 0.8)
-          draw.roundRect(3, 3, w - 6, h - 6, h, 2)
+          draw.roundRect(5, 5, w - 10, h - 10, (h - 10) / 3, 5)
           draw.setColorA(0.0, 0.0, 0.0)
         end
-      ]],
-      DragInfo = 0x3B0
-    }
+      ]]
+    )
   end,
 
   generate = function(self)
@@ -46,19 +47,15 @@ Generate a token at simulation start
       [==[
         local block = {}
 
-        block.start = function()
-          block.token = true
-        end
-
         block.step = function()
-          token.set('.UUID.token', block.token)
-          return block
+          return block.parent.states and not not block.parent.states['NAME']
         end
 
         return block
       ]==]
     local replaces = {
       ['UUID'] = block.getUUID(),
+      ['NAME'] = self.parameter.name,
     }
     return string.gsub(source, '%a+', replaces)
   end,

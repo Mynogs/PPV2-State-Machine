@@ -1,4 +1,5 @@
--- 19.08.2017 05:46:20 AR V1.0a
+block.getName()-- 19.08.2017 05:46:20 AR V1.0a
+-- 21.03.2018 11:26:45 AR V1.0b No pins for states in/out
 
 generic = {
   parameter = {
@@ -11,6 +12,7 @@ generic = {
     block.setInputsPinCount(self.parameter.inputs)
     for i = 1, self.parameter.inputs do
       block.setInputPinTypeRestrains(i, 'nil', 'table')
+      block.setInputPinAppearance(i, 0)
     end
     if self.parameter.hasStateOutput then
       block.setOutputsPinCount(2)
@@ -20,6 +22,7 @@ generic = {
       block.setOutputsPinCount(1)
     end
     block.setOutputPinTypeRestrains(1, 'table')
+    block.setOutputPinAppearance(1, 0)
   end,
 
   init = function(self)
@@ -58,7 +61,7 @@ It is possible to add a boolean state output
   end,
 
   avatar = function(self)
-    return block.getDefaultAvatar(0x52, "'" .. (self.parameter.info or '') .. "'",
+    return block.getDefaultAvatar(0x152, "'" .. (self.parameter.info or '') .. "'",
       [[
         if token.get('.' .. self.uuid .. '.token') == 'true' then
           draw.setColorA(1.0, 0.6, 0.8)
@@ -87,6 +90,10 @@ It is possible to add a boolean state output
             v.token = false
           end
           token.set('.UUID.token', block.token)
+          if not block.parent.states then
+            block.parent.states = {}
+          end
+          block.parent.states['NAME'] = block.token
           return block, block.token
         end
 
@@ -94,6 +101,7 @@ It is possible to add a boolean state output
       ]==]
     local replaces = {
       ['UUID'] = block.getUUID(),
+      ['NAME'] = block.getName(),
     }
     return string.gsub(source, '%a+', replaces)
   end,

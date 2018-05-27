@@ -11,6 +11,7 @@ generic = {
     block.setOutputsPinCount(1)
     block.setInputPinTypeRestrains(1, 'boolean', 'number')
     block.setOutputPinTypeRestrains(1, 'table')
+    block.setOutputPinAppearance(1, 0)
     block.modifyFlags('SupressStopFunctionCall', true)
   end,
 
